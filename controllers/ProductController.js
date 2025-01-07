@@ -35,6 +35,15 @@ const ProductController = {
       console.error(error);
     }
   },
+
+  async deleteProduct(req, res) {
+    await Product.destroy({
+      where: {
+        id: req.params.id,
+      },
+    });
+    res.send("Producto eliminado correctamente")
+  },
 };
 
 module.exports = ProductController;
