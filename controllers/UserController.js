@@ -37,6 +37,15 @@ const UserController = {
       console.error(error);
     }
   },
+
+  async upgradeUser(req, res) {
+    await User.update(req.body, {
+      where: {
+        id: req.params.id,
+      },
+    });
+    res.send("Usuario actualizado con exito");
+  },
 };
 
 module.exports = UserController;
