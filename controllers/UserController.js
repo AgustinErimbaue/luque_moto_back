@@ -38,7 +38,7 @@ const UserController = {
     }
   },
 
-  async upgradeUser(req, res) {
+  async updateUser(req, res) {
     await User.update(req.body, {
       where: {
         id: req.params.id,
