@@ -1,4 +1,5 @@
-const { User } = require("../models/index");
+const { User, Sequelize } = require("../models/index");
+const { Op } = Sequelize;
 
 const UserController = {
   async create(req, res) {
@@ -19,6 +20,21 @@ const UserController = {
     } catch (error) {
       console.error(error);
       res.status(500).send(error);
+    }
+  },
+
+  async getByName(req, res) {
+    try {
+      const user = await User.findOne({
+        where: {
+          name: {
+            [Op.like]: `%${req.params.name}`,
+          },
+        },
+      });
+      res.send(user);
+    } catch (error) {
+      console.error(error);
     }
   },
 };
