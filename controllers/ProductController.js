@@ -42,7 +42,16 @@ const ProductController = {
         id: req.params.id,
       },
     });
-    res.send("Producto eliminado correctamente")
+    res.send("Producto eliminado correctamente");
+  },
+
+  async updateProduct(req, res) {
+    await Product.update(req.body, {
+      where: {
+        id: req.params.id,
+      },
+    });
+    res.send("Producto actualizado correctamente")
   },
 };
 

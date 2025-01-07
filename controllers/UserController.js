@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const { User, Sequelize } = require("../models/index");
 const { Op } = Sequelize;
 
@@ -36,6 +37,15 @@ const UserController = {
     } catch (error) {
       console.error(error);
     }
+  },
+
+  async deleteUser(req, res) {
+    await User.destroy({
+      where: {
+        id: req.params.id,
+      },
+    });
+    res.send("Usuario eliminado correctamente")
   },
 
   async updateUser(req, res) {
