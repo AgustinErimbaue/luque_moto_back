@@ -1,4 +1,6 @@
-const { Product } = require("../models/index");
+const { where } = require("sequelize");
+const { Product, Sequelize } = require("../models/index");
+const { Op } = Sequelize;
 
 const ProductController = {
   async create(req, res) {
@@ -17,6 +19,20 @@ const ProductController = {
     } catch (error) {
       console.error(error);
       res.status(500).send(error);
+    }
+  },
+  async getByName(req, res) {
+    try {
+      const product = await Product.findOne({
+        where: {
+          name: {
+            [Op.like]: `%${req.params.name}`,
+          },
+        },
+      });
+      res.send(product);
+    } catch (error) {
+      console.error(error);
     }
   },
 };
