@@ -1,11 +1,14 @@
 const { where } = require("sequelize");
 const { User, Sequelize } = require("../models/index");
 const { Op } = Sequelize;
+const bcrypt = require("bcryptjs");
 
 const UserController = {
   async create(req, res) {
     try {
+      const password = bcrypt.hashSync(req.body.password, 10);
       req.body.role = "user";
+      req.body.password = password;
       const user = await User.create(req.body);
       res.status(201).send({ msg: "Usuario creado con exito", user });
     } catch (error) {
@@ -45,7 +48,7 @@ const UserController = {
         id: req.params.id,
       },
     });
-    res.send("Usuario eliminado correctamente")
+    res.send("Usuario eliminado correctamente");
   },
 
   async updateUser(req, res) {
