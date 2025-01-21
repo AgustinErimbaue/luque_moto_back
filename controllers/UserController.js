@@ -17,6 +17,26 @@ const UserController = {
     }
   },
 
+  async login(req, res) {
+    User.findOne({
+      where: {
+        email: req.body.email,
+      },
+    }).then((user) => {
+      if (!user) {
+        return res
+          .status(400)
+          .send({ msg: "usuario o contrasena incorrectos" });
+      }
+      const isMatch = bcrypt.compareSync(req.body.password, user.password);
+      if (!isMatch) {
+        return res
+          .status(400)
+          .send({ msg: "Usuario o contrasena incorrectos" });
+      }
+    });
+  },
+
   async getAll(req, res) {
     try {
       const users = await User.findAll();
