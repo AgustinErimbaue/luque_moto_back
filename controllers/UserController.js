@@ -34,6 +34,7 @@ const UserController = {
           .status(400)
           .send({ msg: "Usuario o contrasena incorrectos" });
       }
+      res.send(user);
     });
   },
 
