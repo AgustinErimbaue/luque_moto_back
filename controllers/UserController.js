@@ -1,5 +1,5 @@
 const { where } = require("sequelize");
-const { User, Sequelize } = require("../models/index");
+const { User, Sequelize, Token } = require("../models/index");
 const { Op } = Sequelize;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -20,25 +20,36 @@ const UserController = {
   },
 
   async login(req, res) {
-    User.findOne({
-      where: {
-        email: req.body.email,
-      },
-    }).then((user) => {
+    try {
+      const user = await User.findOne({
+        where: {
+          email: req.body.email,
+        },
+      });
+
       if (!user) {
         return res
           .status(400)
-          .send({ msg: "usuario o contrasena incorrectos" });
+          .send({ msg: "Usuario o contraseña incorrectos" });
       }
+
       const isMatch = bcrypt.compareSync(req.body.password, user.password);
       if (!isMatch) {
         return res
           .status(400)
-          .send({ msg: "Usuario o contrasena incorrectos" });
+          .send({ msg: "Usuario o contraseña incorrectos" });
       }
+
       const token = jwt.sign({ id: user.id }, jwt_secret);
-      res.send({ msg: "Bienvenido/a"+ + user.name, user, token });
-    });
+
+     
+      await Token.create({ UserId: user.id, token });
+
+      res.send({ msg: "Bienvenido/a " + user.name, user, token });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ msg: "Error en el proceso de login", error });
+    }
   },
 
   async getAll(req, res) {
