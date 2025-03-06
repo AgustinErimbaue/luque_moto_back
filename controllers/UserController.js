@@ -21,31 +21,26 @@ const UserController = {
 
   async login(req, res) {
     try {
-      const user = await User.findOne({
+      User.findOne({
         where: {
           email: req.body.email,
         },
+      }).then((user) => {
+        if (!user) {
+          return res
+            .status(400)
+            .send({ message: "Usuario o contraseña incorrectos" });
+        }
+        const isMatch = bcrypt.compareSync(req.body.password, user.password);
+        if (!isMatch) {
+          return res
+            .status(400)
+            .send({ message: "Usuario o contraseña incorrectos" });
+        }
+        const token = jwt.sign({ id: user.id }, jwt_secret);
+        Token.create({ token, UserId: user.id });
+        res.send({ message: "Bienvenid@ " + user.name, user, token });
       });
-
-      if (!user) {
-        return res
-          .status(400)
-          .send({ msg: "Usuario o contraseña incorrectos" });
-      }
-
-      const isMatch = bcrypt.compareSync(req.body.password, user.password);
-      if (!isMatch) {
-        return res
-          .status(400)
-          .send({ msg: "Usuario o contraseña incorrectos" });
-      }
-
-      const token = jwt.sign({ id: user.id }, jwt_secret);
-
-     
-      await Token.create({ UserId: user.id, token });
-
-      res.send({ msg: "Bienvenido/a " + user.name, user, token });
     } catch (error) {
       console.error(error);
       res.status(500).send({ msg: "Error en el proceso de login", error });
@@ -93,6 +88,23 @@ const UserController = {
       },
     });
     res.send("Usuario actualizado con exito");
+  },
+
+  async logout(req, res) {
+    try {
+      await Token.destroy({
+        where: {
+          [Op.and]: [
+            { UserId: req.user.id },
+            { token: req.headers.authorization },
+          ],
+        },
+      });
+      res.send({ message: "Desconectado con exito" });
+    } catch (error) {
+      console.error(error)
+      res.status(500).send ({message:"Problema al desconectarse"});
+    }
   },
 };
 
