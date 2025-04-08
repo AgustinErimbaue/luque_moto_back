@@ -7,8 +7,8 @@ app.use(express.json());
 app.use(cors());
 app.use("/users", require("./routes/users"));
 app.use("/products", require("./routes/products"));
-app.use("/orders", require("./routes/order"));
-app.use("/orderitems", require("./routes/orderItem"));
+app.use("/orders", require("./routes/orders"));
+app.use("/orderitems", require("./routes/ordersItems"));
 app.use("/shippinaddress", require("./routes/shippingaddress"));
 
 app.listen(PORT, () => {

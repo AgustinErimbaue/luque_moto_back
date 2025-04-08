@@ -9,7 +9,9 @@ const ProductController = {
       res.status(201).send({ msg: "Producto creado", product });
     } catch (error) {
       console.error(error);
-      res.status(500).send(error);
+      res
+        .status(500)
+        .send({ msg: "No se a podido agregar el producto correctamente" });
     }
   },
   async getAll(req, res) {
@@ -18,7 +20,7 @@ const ProductController = {
       res.send({ msg: "Todos los productos:", products });
     } catch (error) {
       console.error(error);
-      res.status(500).send(error);
+      res.status(500).send({msg:"Error al obtener los productos"});
     }
   },
   async getByName(req, res) {
@@ -51,7 +53,7 @@ const ProductController = {
         id: req.params.id,
       },
     });
-    res.send("Producto actualizado correctamente")
+    res.send("Producto actualizado correctamente");
   },
 };
 

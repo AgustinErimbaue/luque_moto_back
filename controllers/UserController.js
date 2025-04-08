@@ -15,7 +15,7 @@ const UserController = {
       res.status(201).send({ msg: "Usuario creado con exito", user });
     } catch (error) {
       console.error(error);
-      res.status(500).send(error);
+      res.status(500).send({msg:"Error al registrarse",error});
     }
   },
 
@@ -29,17 +29,17 @@ const UserController = {
         if (!user) {
           return res
             .status(400)
-            .send({ message: "Usuario o contraseña incorrectos" });
+            .send({ msg: "Usuario o contraseña incorrectos" });
         }
         const isMatch = bcrypt.compareSync(req.body.password, user.password);
         if (!isMatch) {
           return res
             .status(400)
-            .send({ message: "Usuario o contraseña incorrectos" });
+            .send({ msg: "Usuario o contraseña incorrectos" });
         }
         const token = jwt.sign({ id: user.id }, jwt_secret);
         Token.create({ token, UserId: user.id });
-        res.send({ message: "Bienvenid@ " + user.name, user, token });
+        res.send({ msg: "Bienvenid@ " + user.name, user, token });
       });
     } catch (error) {
       console.error(error);
@@ -100,10 +100,10 @@ const UserController = {
           ],
         },
       });
-      res.send({ message: "Desconectado con exito" });
+      res.send({ msg: "Desconectado con exito" });
     } catch (error) {
       console.error(error)
-      res.status(500).send ({message:"Problema al desconectarse"});
+      res.status(500).send ({msg:"Problema al desconectarse"});
     }
   },
 };
