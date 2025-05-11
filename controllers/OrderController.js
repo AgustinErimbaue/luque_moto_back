@@ -1,16 +1,44 @@
-const { Order, Sequelize } = require("../models/index");
+const { Order, OrderItem, Sequelize } = require("../models/index");
 const { where } = require("sequelize");
 const { Op } = Sequelize;
 
 const OrderController = {
   async create(req, res) {
+    const t = await Order.sequelize.transaction();
     try {
-      const order = await Order.create(req.body);
+      const { UserId, totalAmount, status, items } = req.body;
+
+      if (!items || !Array.isArray(items)) {
+        return res.status(400).send({ msg: "'items' debe ser un arreglo" });
+      }
+
+      const order = await Order.create(
+        { UserId, totalAmount, status },
+        { transaction: t }
+      );
+
+      const orderItems = items.map((item) => ({
+        OrderId: order.id,
+        ProductId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+
+      await OrderItem.bulkCreate(orderItems, { transaction: t });
+
+      await t.commit();
+
       res.status(201).send({ msg: "Orden creada", order });
     } catch (error) {
-      res.status(500).send({ msg: "Error al crear la orden", error });
+      await t.rollback();
+      console.error("Error al crear la orden:", error);
+      res.status(500).send({
+        msg: "Error al crear la orden",
+        error: error.message || error,
+      });
     }
   },
+
   async getAll(req, res) {
     try {
       const orders = await Order.findAll();
@@ -19,16 +47,22 @@ const OrderController = {
       res.status(500).send({ msg: "Error al obtener las órdenes", error });
     }
   },
-  async getById(req, res) {
+  async getUserOrders(req, res) {
     try {
-      const order = await Order.findOne({
-        where: {
-          id: req.params.id,
-        },
+      const userId = req.user.id; // Asegúrate de que req.user esté configurado correctamente
+  
+      const orders = await Order.findAll({
+        where: { UserId: userId },
+        include: [{
+          model: OrderItem,
+          include: ['Product'],
+        }],
       });
-      res.send({ msg: "Orden encontrada:", order });
+  
+      res.send({ msg: "Tus órdenes", orders });
     } catch (error) {
-      res.status(500).send({ msg: "Error al buscar la orden", error });
+      console.error("Error al obtener las órdenes del usuario:", error);
+      res.status(500).send({ msg: "Error al obtener tus órdenes", error: error.message });
     }
   },
   async updateOrder(req, res) {

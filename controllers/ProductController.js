@@ -20,7 +20,7 @@ const ProductController = {
       res.send({ msg: "Todos los productos:", products });
     } catch (error) {
       console.error(error);
-      res.status(500).send({msg:"Error al obtener los productos"});
+      res.status(500).send({ msg: "Error al obtener los productos" });
     }
   },
   async getByName(req, res) {
@@ -48,12 +48,31 @@ const ProductController = {
   },
 
   async updateProduct(req, res) {
-    await Product.update(req.body, {
-      where: {
-        id: req.params.id,
-      },
-    });
-    res.send("Producto actualizado correctamente");
+    try {
+      const { id } = req.params; // Asegúrate de obtener el id desde los parámetros de la solicitud
+      const { name, description, price, stock } = req.body; // Obtener los datos del producto desde el cuerpo de la solicitud
+
+      // Actualizar el producto en la base de datos
+      const updatedProduct = await Product.update(
+        { name, description, price, stock },
+        { where: { id } }
+      );
+
+      if (!updatedProduct[0]) {
+        // Si no se encontró el producto o no se actualizó, enviar un error
+        return res.status(404).json({ message: "Producto no encontrado" });
+      }
+
+      // Obtener el producto actualizado
+      const product = await Product.findByPk(id);
+
+      return res.json({ product });
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ message: "Error al actualizar el producto" });
+    }
   },
 };
 
