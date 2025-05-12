@@ -8,7 +8,7 @@ const { jwt_secret } = require("../config/config.json")["development"];
 const UserController = {
   async create(req, res) {
     try {
-      const password = bcrypt.hashSync(req.body.password, 10);
+      const password = await bcrypt.hash(req.body.password, 10);
       req.body.role = "user";
       req.body.password = password;
       const user = await User.create(req.body);
@@ -21,26 +21,27 @@ const UserController = {
 
   async login(req, res) {
     try {
-      User.findOne({
-        where: {
-          email: req.body.email,
-        },
-      }).then((user) => {
-        if (!user) {
-          return res
-            .status(400)
-            .send({ msg: "Usuario o contraseña incorrectos" });
-        }
-        const isMatch = bcrypt.compareSync(req.body.password, user.password);
-        if (!isMatch) {
-          return res
-            .status(400)
-            .send({ msg: "Usuario o contraseña incorrectos" });
-        }
-        const token = jwt.sign({ id: user.id }, jwt_secret);
-        Token.create({ token, UserId: user.id });
-        res.send({ msg: "Bienvenid@ " + user.name, user, token });
-      });
+      const { email, password } = req.body;
+
+      // Validación básica
+      if (!email || !password) {
+        return res.status(400).send({ msg: "Email y contraseña son obligatorios" });
+      }
+
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+        return res.status(400).send({ msg: "Usuario o contraseña incorrectos" });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).send({ msg: "Usuario o contraseña incorrectos" });
+      }
+
+      const token = jwt.sign({ id: user.id }, jwt_secret, { expiresIn: "1h" });
+      await Token.create({ token, UserId: user.id });
+
+      res.send({ msg: `Bienvenid@ ${user.name}`, user, token });
     } catch (error) {
       console.error(error);
       res.status(500).send({ msg: "Error en el proceso de login", error });
@@ -73,21 +74,33 @@ const UserController = {
   },
 
   async deleteUser(req, res) {
-    await User.destroy({
-      where: {
-        id: req.params.id,
-      },
-    });
-    res.send("Usuario eliminado correctamente");
+    try {
+      const user = await User.findByPk(req.params.id);
+      if (!user) {
+        return res.status(404).send({ msg: "Usuario no encontrado" });
+      }
+
+      await User.destroy({ where: { id: req.params.id } });
+      res.send({ msg: "Usuario eliminado correctamente" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ msg: "Error al eliminar el usuario" });
+    }
   },
 
   async updateUser(req, res) {
-    await User.update(req.body, {
-      where: {
-        id: req.params.id,
-      },
-    });
-    res.send("Usuario actualizado con exito");
+    try {
+      const user = await User.findByPk(req.params.id);
+      if (!user) {
+        return res.status(404).send({ msg: "Usuario no encontrado" });
+      }
+
+      await User.update(req.body, { where: { id: req.params.id } });
+      res.send({ msg: "Usuario actualizado con éxito" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ msg: "Error al actualizar el usuario" });
+    }
   },
 
   async logout(req, res) {
