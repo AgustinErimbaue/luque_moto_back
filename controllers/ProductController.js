@@ -1,77 +1,109 @@
 const { where } = require("sequelize");
 const { Product, Sequelize } = require("../models/index");
 const { Op } = Sequelize;
+const Joi = require("joi");
 
 const ProductController = {
   async create(req, res) {
     try {
+      const schema = Joi.object({
+        name: Joi.string().min(3).required(),
+        description: Joi.string().min(5).required(),
+        price: Joi.number().positive().required(),
+        stock: Joi.number().integer().min(0).required(),
+      });
+
+      const { error } = schema.validate(req.body);
+      if (error) {
+        return res.status(400).send({ msg: error.details[0].message });
+      }
+
       const product = await Product.create(req.body);
       res.status(201).send({ msg: "Producto creado", product });
     } catch (error) {
-      console.error(error);
-      res
-        .status(500)
-        .send({ msg: "No se a podido agregar el producto correctamente" });
+      console.error("Error al crear el producto:", error);
+      res.status(500).send({ msg: "Error al crear el producto" });
     }
   },
+
   async getAll(req, res) {
     try {
       const products = await Product.findAll();
       res.send({ msg: "Todos los productos:", products });
     } catch (error) {
-      console.error(error);
+      console.error("Error al obtener los productos:", error);
       res.status(500).send({ msg: "Error al obtener los productos" });
     }
   },
+
   async getByName(req, res) {
     try {
       const product = await Product.findOne({
         where: {
           name: {
-            [Op.like]: `%${req.params.name}`,
+            [Op.like]: `%${req.params.name}%`,
           },
         },
       });
+
+      if (!product) {
+        return res.status(404).send({ msg: "Producto no encontrado" });
+      }
+
       res.send(product);
     } catch (error) {
-      console.error(error);
+      console.error("Error al buscar el producto:", error);
+      res.status(500).send({ msg: "Error al buscar el producto" });
     }
   },
 
   async deleteProduct(req, res) {
-    await Product.destroy({
-      where: {
-        id: req.params.id,
-      },
-    });
-    res.send("Producto eliminado correctamente");
+    try {
+      const product = await Product.findByPk(req.params.id);
+
+      if (!product) {
+        return res.status(404).send({ msg: "Producto no encontrado" });
+      }
+
+      await Product.destroy({ where: { id: req.params.id } });
+      res.send({ msg: "Producto eliminado correctamente" });
+    } catch (error) {
+      console.error("Error al eliminar el producto:", error);
+      res.status(500).send({ msg: "Error al eliminar el producto" });
+    }
   },
 
   async updateProduct(req, res) {
     try {
-      const { id } = req.params; // Asegúrate de obtener el id desde los parámetros de la solicitud
-      const { name, description, price, stock } = req.body; // Obtener los datos del producto desde el cuerpo de la solicitud
+      const { id } = req.params;
 
-      // Actualizar el producto en la base de datos
-      const updatedProduct = await Product.update(
-        { name, description, price, stock },
-        { where: { id } }
-      );
-
-      if (!updatedProduct[0]) {
-        // Si no se encontró el producto o no se actualizó, enviar un error
-        return res.status(404).json({ message: "Producto no encontrado" });
+      const product = await Product.findByPk(id);
+      if (!product) {
+        return res.status(404).send({ msg: "Producto no encontrado" });
       }
 
-      // Obtener el producto actualizado
-      const product = await Product.findByPk(id);
+      const schema = Joi.object({
+        name: Joi.string().min(3),
+        description: Joi.string().min(5),
+        price: Joi.number().positive(),
+        stock: Joi.number().integer().min(0),
+      });
 
-      return res.json({ product });
+      const { error } = schema.validate(req.body);
+      if (error) {
+        return res.status(400).send({ msg: error.details[0].message });
+      }
+
+      await Product.update(req.body, { where: { id } });
+
+      const updatedProduct = await Product.findByPk(id);
+      res.send({
+        msg: "Producto actualizado con éxito",
+        product: updatedProduct,
+      });
     } catch (error) {
-      console.error(error);
-      return res
-        .status(500)
-        .json({ message: "Error al actualizar el producto" });
+      console.error("Error al actualizar el producto:", error);
+      res.status(500).send({ msg: "Error al actualizar el producto" });
     }
   },
 };
