@@ -36,12 +36,14 @@ const ShippingAddressController = {
         return res.status(400).send({ msg: "Faltan campos obligatorios" });
       }
 
-      const [updatedRows] = await ShippingAddress.update(req.body, {
-        fields: ["address", "city", "state", "postalCode", "country"],
-        where: {
-          id: req.params.id,
-        },
-      });
+      const [updatedRows] = await ShippingAddress.update(
+        { address, city, state, postalCode, country },
+        {
+          where: {
+            id: req.params.id,
+          },
+        }
+      );
 
       if (updatedRows === 0) {
         return res.status(404).send({ msg: "Direccion no encontrada" });
