@@ -14,7 +14,14 @@ const OrderItemController = {
   },
   async getAll(req, res) {
     try {
-      const ordersItems = await OrderItem.findAll();
+      const ordersItems = await OrderItem.findAll({
+        include: [
+          {
+            model: require("../models/index").Product,
+            attributes: ["id", "name"],
+          },
+        ],
+      });
       res
         .status(201)
         .send({ msg: "Busqueda realizada con exito", ordersItems });
