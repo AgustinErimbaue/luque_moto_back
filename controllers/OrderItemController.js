@@ -5,7 +5,17 @@ const { Op } = Sequelize;
 const OrderItemController = {
   async create(req, res) {
     try {
-      const orderItem = await OrderItem.create(req.body);
+      const { OrderId, ProductId, quantity, price } = req.body;
+      console.log("BODY RECIBIDO:", req.body);
+      if (!OrderId || !ProductId || !quantity || !price) {
+        return res.status(400).send({ msg: "Faltan datos obligatorios" });
+      }
+      const orderItem = await OrderItem.create({
+        OrderId,
+        ProductId,
+        quantity,
+        price,
+      });
       res.status(201).send({ msg: "Se crea correctamente", orderItem });
     } catch (error) {
       console.error(error);

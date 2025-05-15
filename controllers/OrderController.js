@@ -19,7 +19,7 @@ const OrderController = {
 
       const orderItems = items.map((item) => ({
         OrderId: order.id,
-        ProductId: item.productId,
+        ProductId: item.ProductId,
         quantity: item.quantity,
         price: item.price,
       }));
