@@ -49,7 +49,7 @@ const OrderController = {
   },
   async getUserOrders(req, res) {
     try {
-      const userId = req.user.id; // Asegúrate de que req.user esté configurado correctamente
+      const userId = req.user.id; 
   
       const orders = await Order.findAll({
         where: { UserId: userId },
