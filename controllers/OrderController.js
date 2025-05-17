@@ -49,20 +49,24 @@ const OrderController = {
   },
   async getUserOrders(req, res) {
     try {
-      const userId = req.user.id; 
-  
+      const userId = req.user.id;
+
       const orders = await Order.findAll({
         where: { UserId: userId },
-        include: [{
-          model: OrderItem,
-          include: ['Product'],
-        }],
+        include: [
+          {
+            model: OrderItem,
+            include: ["Product"],
+          },
+        ],
       });
-  
+
       res.send({ msg: "Tus órdenes", orders });
     } catch (error) {
       console.error("Error al obtener las órdenes del usuario:", error);
-      res.status(500).send({ msg: "Error al obtener tus órdenes", error: error.message });
+      res
+        .status(500)
+        .send({ msg: "Error al obtener tus órdenes", error: error.message });
     }
   },
   async updateOrder(req, res) {
@@ -75,6 +79,19 @@ const OrderController = {
       res.send({ msg: "Orden modificada con exito" });
     } catch (error) {
       res.status(500).send({ msg: "Error al modificar la orden", error });
+    }
+  },
+
+  async deleteOrder(req, res) {
+    try {
+      await Order.destroy({
+        where: {
+          id: req.params.id,
+        },
+      });
+      res.send({ msg: "Orden eliminada con exito" });
+    } catch (error) {
+      res.status(500).send({ msg: "Error al eliminar la orden", error });
     }
   },
 };
