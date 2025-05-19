@@ -55,6 +55,16 @@ const ShippingAddressController = {
       res.status(500).send({ msg: "Error interno del servidor" });
     }
   },
+
+  async getAllAddresses(req, res) {
+    try {
+      const addresses = await ShippingAddress.findAll();
+      res.send({ msg: "Direcciones encontradas", addresses });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ msg: "Error interno del servidor" });
+    }
+  },
 };
 
 module.exports = ShippingAddressController;

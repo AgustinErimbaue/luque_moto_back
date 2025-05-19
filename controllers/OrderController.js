@@ -1,4 +1,9 @@
-const { Order, OrderItem, Sequelize } = require("../models/index");
+const {
+  Order,
+  OrderItem,
+  ShippingAddress,
+  Sequelize,
+} = require("../models/index");
 const { where } = require("sequelize");
 const { Op } = Sequelize;
 
@@ -6,7 +11,17 @@ const OrderController = {
   async create(req, res) {
     const t = await Order.sequelize.transaction();
     try {
-      const { UserId, totalAmount, status, items } = req.body;
+      const {
+        UserId,
+        totalAmount,
+        status,
+        items,
+        address,
+        city,
+        state,
+        postalCode,
+        country,
+      } = req.body;
 
       if (!items || !Array.isArray(items)) {
         return res.status(400).send({ msg: "'items' debe ser un arreglo" });
@@ -26,6 +41,19 @@ const OrderController = {
 
       await OrderItem.bulkCreate(orderItems, { transaction: t });
 
+      await ShippingAddress.create(
+        {
+          userId: UserId,
+          address,
+          city,
+          state,
+          postalCode,
+          country,
+          OrderId: order.id,
+        },
+        { transaction: t }
+      );
+
       await t.commit();
 
       res.status(201).send({ msg: "Orden creada", order });
@@ -41,12 +69,24 @@ const OrderController = {
 
   async getAll(req, res) {
     try {
-      const orders = await Order.findAll();
+      const orders = await Order.findAll({
+        include: [
+          {
+            model: OrderItem,
+            include: ["Product"],
+          },
+          {
+            model: ShippingAddress,
+            atributes: ["address", "city", "state", "postalCode", "country"],
+          },
+        ],
+      });
       res.send({ msg: "Todas las ordenes", orders });
     } catch (error) {
       res.status(500).send({ msg: "Error al obtener las órdenes", error });
     }
   },
+
   async getUserOrders(req, res) {
     try {
       const userId = req.user.id;
@@ -57,6 +97,9 @@ const OrderController = {
           {
             model: OrderItem,
             include: ["Product"],
+          },
+          {
+            model: ShippingAddress,
           },
         ],
       });
@@ -69,6 +112,7 @@ const OrderController = {
         .send({ msg: "Error al obtener tus órdenes", error: error.message });
     }
   },
+
   async updateOrder(req, res) {
     try {
       await Order.update(req.body, {
