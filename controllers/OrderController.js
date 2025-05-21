@@ -77,7 +77,7 @@ const OrderController = {
           },
           {
             model: ShippingAddress,
-            atributes: ["address", "city", "state", "postalCode", "country"],
+            attributes: ["address", "city", "state", "postalCode", "country"],
           },
         ],
       });
