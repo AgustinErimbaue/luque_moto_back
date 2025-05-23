@@ -4,10 +4,14 @@ require("dotenv").config();
 const PORT = process.env.PORT || 3000;
 const cors = require("cors");
 
-app.use(cors());
-app.use(cors({
-  origin: 'https://luque-moto-front.vercel.app'
-}));
+
+const corsOptions = {
+  origin: 'https://luque-moto-front.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use("/users", require("./routes/users"));
