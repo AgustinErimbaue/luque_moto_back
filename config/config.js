@@ -4,7 +4,8 @@ module.exports = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
-    dialect: "mysql",
+    port: process.env.DB_PORT,
+    dialect: "postgres",
     jwt_secret: process.env.JWT_SECRET,
   },
   test: {
@@ -12,7 +13,7 @@ module.exports = {
     password: null,
     database: "database_test",
     host: "127.0.0.1",
-    dialect: "mysql",
+    dialect: "postgres",
     jwt_secret: "clave_secreta_test",
   },
   production: {
@@ -20,7 +21,8 @@ module.exports = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
-    dialect: "mysql",
+    port: process.env.DB_PORT,
+    dialect: "postgres",
     jwt_secret: process.env.JWT_SECRET,
   },
 };

@@ -4,6 +4,7 @@ const { Op } = Sequelize;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { jwt_secret } = require("../config/config.js")["development"];
+console.log("jwt_secret:", jwt_secret);
 
 const UserController = {
   async create(req, res) {
@@ -20,33 +21,33 @@ const UserController = {
   },
 
   async login(req, res) {
-    try {
-      const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-      // Validación básica
-      if (!email || !password) {
-        return res.status(400).send({ msg: "Email y contraseña son obligatorios" });
-      }
-
-      const user = await User.findOne({ where: { email } });
-      if (!user) {
-        return res.status(400).send({ msg: "Usuario o contraseña incorrectos" });
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).send({ msg: "Usuario o contraseña incorrectos" });
-      }
-
-      const token = jwt.sign({ id: user.id }, jwt_secret, { expiresIn: "1h" });
-      await Token.create({ token, UserId: user.id });
-
-      res.send({ msg: `Bienvenid@ ${user.name}`, user, token });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send({ msg: "Error en el proceso de login", error });
+    if (!email || !password) {
+      return res.status(400).send({ msg: "Email y contraseña son obligatorios" });
     }
-  },
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(400).send({ msg: "Usuario o contraseña incorrectos" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).send({ msg: "Usuario o contraseña incorrectos" });
+    }
+
+    const token = jwt.sign({ id: user.id }, jwt_secret, { expiresIn: "1h" });
+    await Token.create({ token, UserId: user.id });
+
+    res.send({ msg: `Bienvenid@ ${user.name}`, user, token });
+  } catch (error) {
+    console.error("Error en login:", error);
+    res.status(500).send({ msg: "Error en el proceso de login", error: error.message });
+  }
+},
+
 
   async getAll(req, res) {
     try {

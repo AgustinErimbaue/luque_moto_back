@@ -10,10 +10,18 @@ const config = require(__dirname + '/../config/config.js')[env];
 const db = {};
 
 let sequelize;
+
 if (config.use_env_variable) {
+  // En caso de que quieras usar la URL completa como variable de entorno, no es tu caso ahora pero lo dejo por si acaso
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  // Aquí aseguramos pasar explícitamente el port porque config lo tiene separado
+  sequelize = new Sequelize(config.database, config.username, config.password, {
+    host: config.host,
+    port: config.port,
+    dialect: config.dialect,
+    logging: false,  // opcional, para no mostrar logs SQL
+  });
 }
 
 fs
