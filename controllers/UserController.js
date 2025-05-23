@@ -3,7 +3,7 @@ const { User, Sequelize, Token } = require("../models/index");
 const { Op } = Sequelize;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../config/config.js")["development"];
+const { jwt_secret } = require("../config/config.js")["development"];
 
 const UserController = {
   async create(req, res) {
@@ -38,7 +38,7 @@ const UserController = {
         return res.status(400).send({ msg: "Usuario o contraseña incorrectos" });
       }
 
-      const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "1h" });
+      const token = jwt.sign({ id: user.id }, jwt_secret, { expiresIn: "1h" });
       await Token.create({ token, UserId: user.id });
 
       res.send({ msg: `Bienvenid@ ${user.name}`, user, token });
