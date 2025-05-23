@@ -7,6 +7,12 @@ module.exports = {
     port: process.env.DB_PORT,
     dialect: "postgres",
     jwt_secret: process.env.JWT_SECRET,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
   },
   test: {
     username: process.env.DB_USER,
@@ -24,5 +30,11 @@ module.exports = {
     port: process.env.DB_PORT,
     dialect: "postgres",
     jwt_secret: process.env.JWT_SECRET,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
   },
 };
