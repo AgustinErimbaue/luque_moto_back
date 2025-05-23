@@ -3,7 +3,7 @@ const { User, Sequelize, Token } = require("../models/index");
 const { Op } = Sequelize;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../config/config.json")["development"];
+const { JWT_SECRET } = require("../config/config.js")["development"];
 
 const UserController = {
   async create(req, res) {
