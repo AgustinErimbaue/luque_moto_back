@@ -1,13 +1,14 @@
 const express = require("express");
 const app = express();
-const cors = require("cors");
 require("dotenv").config();
 const PORT = process.env.PORT || 3000;
+const cors = require("cors");
 
 app.use(express.json());
 app.use(cors({
   origin: [
-    "https://luque-moto-front.vercel.app",
+    "https://luque-moto-front.vercel.app", // Dominio de producción
+    "https://luque-moto-front-egzio8gqy-agustinerimbaues-projects.vercel.app", // Dominio de preview (si lo usas para pruebas)
     "http://localhost:3000"
   ],
   credentials: true
