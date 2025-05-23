@@ -18,3 +18,7 @@ app.use("/shippingaddress", require("./routes/shippingaddress"));
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('DB_HOST:', process.env.DB_HOST);
+console.log('DB_USER:', process.env.DB_USER);
+console.log('Usando config:', require('./config/config.js')[process.env.NODE_ENV || 'development']);
