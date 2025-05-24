@@ -2,16 +2,10 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 app.use(express.json());
-app.use(cors({
-  origin: [
-    "https://luque-moto-front.vercel.app",
-    "http://localhost:3000"
-  ],
-  credentials: true
-}));
+app.use(cors());
 app.use("/users", require("./routes/users"));
 app.use("/products", require("./routes/products"));
 app.use("/orders", require("./routes/orders"));
